@@ -1,4 +1,4 @@
-# Multi-stage build for Angular application
+# Multi-stage build for Angular application optimized for Railway
 # Stage 1: Build the application
 FROM node:20-alpine AS builder
 
@@ -26,8 +26,11 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copy built application from builder stage
 COPY --from=builder /app/dist/XpertGroupFront/browser /usr/share/nginx/html
 
-# Expose port 80
-EXPOSE 80
+# Railway uses $PORT environment variable
+ENV PORT=80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"] 
+# Expose the port (Railway will override this)
+EXPOSE $PORT
+
+# Start nginx with Railway port configuration
+CMD sed -i -e 's/$PORT/'"$PORT"'/g' /etc/nginx/nginx.conf && nginx -g 'daemon off;' 
