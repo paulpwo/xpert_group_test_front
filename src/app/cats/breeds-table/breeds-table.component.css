@@ -1,0 +1,57 @@
+/* Custom scrollbar for table */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Table hover effects */
+tbody tr:hover {
+  background-color: #f9fafb;
+  transition: background-color 0.2s ease;
+}
+
+/* Sortable column headers */
+th[class*="cursor-pointer"]:hover {
+  background-color: #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+/* Progress bar animations */
+.progress-bar {
+  transition: width 0.3s ease-in-out;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+  .min-w-full {
+    min-width: 800px;
+  }
+  
+  .text-4xl {
+    font-size: 2rem;
+  }
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+} 
