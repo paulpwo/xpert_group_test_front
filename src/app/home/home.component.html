@@ -1,0 +1,60 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+  <div class="max-w-4xl mx-auto px-6 py-12 text-center">
+    <div class="mb-8">
+      <h1 class="text-5xl font-bold text-gray-900 mb-4">
+        {{ constants.TITLE }}
+      </h1>
+      <p class="text-xl text-gray-600 mb-8">
+        {{ constants.SUBTITLE }}
+      </p>
+    </div>
+    
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-12">
+      <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+      <p class="text-gray-600">{{ constants.LOADING.TEXT }}</p>
+    </div>
+    
+    <!-- Features Grid -->
+    <div *ngIf="!isLoading" class="grid md:grid-cols-3 gap-8 mb-12">
+      <div 
+        *ngFor="let feature of features" 
+        class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 hover:scale-105 transition-transform duration-200"
+        [attr.data-feature-id]="feature.id"
+      >
+        <div class="w-8 h-8 rounded-md flex items-center justify-center mx-auto mb-4" 
+             [ngClass]="{
+               'bg-blue-500': feature.iconColor === 'primary',
+               'bg-green-500': feature.iconColor === 'success',
+               'bg-purple-500': feature.iconColor === 'secondary'
+             }">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="feature.icon"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ feature.title }}</h3>
+        <p class="text-gray-600">{{ feature.description }}</p>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <button 
+        class="font-semibold py-3 px-8 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
+        (click)="onPrimaryButtonClick()"
+        type="button"
+        [attr.aria-label]="constants.ACCESSIBILITY.PRIMARY_BUTTON_LABEL"
+      >
+        {{ constants.BUTTONS.PRIMARY }}
+      </button>
+      <button 
+        class="font-semibold py-3 px-8 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent hover:bg-gray-100 text-gray-700 border border-gray-300 focus:ring-gray-500"
+        (click)="onSecondaryButtonClick()"
+        type="button"
+        [attr.aria-label]="constants.ACCESSIBILITY.SECONDARY_BUTTON_LABEL"
+      >
+        {{ constants.BUTTONS.SECONDARY }}
+      </button>
+    </div>
+  </div>
+</div> 

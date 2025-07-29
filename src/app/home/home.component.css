@@ -1,0 +1,36 @@
+/* Home Component Styles - Minimal custom styles */
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .text-5xl {
+    font-size: 2.25rem; /* text-4xl equivalent */
+  }
+  
+  .text-xl {
+    font-size: 1.125rem; /* text-lg equivalent */
+  }
+  
+  /* Smaller icons on mobile */
+  .w-8.h-8 {
+    width: 1.5rem; /* w-6 */
+    height: 1.5rem; /* h-6 */
+  }
+  
+  .w-4.h-4 {
+    width: 0.75rem; /* w-3 */
+    height: 0.75rem; /* h-3 */
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .transition-shadow,
+  .transition-colors,
+  .transition-transform {
+    transition: none !important;
+  }
+  
+  .animate-spin {
+    animation: none !important;
+  }
+} 
