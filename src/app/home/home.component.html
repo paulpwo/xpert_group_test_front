@@ -1,60 +1,169 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-  <div class="max-w-4xl mx-auto px-6 py-12 text-center">
-    <div class="mb-8">
-      <h1 class="text-5xl font-bold text-gray-900 mb-4">
-        {{ constants.TITLE }}
-      </h1>
-      <p class="text-xl text-gray-600 mb-8">
-        {{ constants.SUBTITLE }}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="text-6xl mb-4">🐱</div>
+      <h1 class="text-5xl font-bold text-gray-900 mb-4">Cat Breeds Explorer</h1>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Selecciona una raza de gato para ver información detallada e imágenes
       </p>
     </div>
-    
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-12">
-      <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-      <p class="text-gray-600">{{ constants.LOADING.TEXT }}</p>
-    </div>
-    
-    <!-- Features Grid -->
-    <div *ngIf="!isLoading" class="grid md:grid-cols-3 gap-8 mb-12">
-      <div 
-        *ngFor="let feature of features" 
-        class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 hover:scale-105 transition-transform duration-200"
-        [attr.data-feature-id]="feature.id"
-      >
-        <div class="w-8 h-8 rounded-md flex items-center justify-center mx-auto mb-4" 
-             [ngClass]="{
-               'bg-blue-500': feature.iconColor === 'primary',
-               'bg-green-500': feature.iconColor === 'success',
-               'bg-purple-500': feature.iconColor === 'secondary'
-             }">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="feature.icon"></path>
-          </svg>
+
+    <!-- Breed Selector -->
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8 max-w-2xl mx-auto">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Selecciona una Raza</h2>
+      
+      <div class="relative">
+        <select 
+          (change)="onBreedSelectChange($event)"
+          class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+          [disabled]="isLoading">
+          <option value="">-- Selecciona una raza de gato --</option>
+          <option 
+            *ngFor="let breed of breeds" 
+            [value]="breed.id"
+            [disabled]="isLoading">
+            {{ breed.name }}
+          </option>
+        </select>
+        
+        <div *ngIf="isLoading" class="absolute right-4 top-4">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ feature.title }}</h3>
-        <p class="text-gray-600">{{ feature.description }}</p>
       </div>
     </div>
-    
-    <!-- Action Buttons -->
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <button 
-        class="font-semibold py-3 px-8 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
-        (click)="onPrimaryButtonClick()"
-        type="button"
-        [attr.aria-label]="constants.ACCESSIBILITY.PRIMARY_BUTTON_LABEL"
-      >
-        {{ constants.BUTTONS.PRIMARY }}
-      </button>
-      <button 
-        class="font-semibold py-3 px-8 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent hover:bg-gray-100 text-gray-700 border border-gray-300 focus:ring-gray-500"
-        (click)="onSecondaryButtonClick()"
-        type="button"
-        [attr.aria-label]="constants.ACCESSIBILITY.SECONDARY_BUTTON_LABEL"
-      >
-        {{ constants.BUTTONS.SECONDARY }}
-      </button>
+
+    <!-- Selected Breed Information and Carousel -->
+    <div *ngIf="selectedBreed" class="bg-white rounded-xl shadow-lg p-8 mb-8">
+      <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Breed Info -->
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-6">{{ selectedBreed.name }}</h2>
+          
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700 mb-2">Descripción</h3>
+              <p class="text-gray-600 leading-relaxed">{{ selectedBreed.description }}</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <h4 class="font-semibold text-gray-700">Origen</h4>
+                <p class="text-gray-600">{{ selectedBreed.origin }}</p>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-700">Esperanza de Vida</h4>
+                <p class="text-gray-600">{{ selectedBreed.life_span }} años</p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="font-semibold text-gray-700 mb-2">Temperamento</h4>
+              <p class="text-gray-600">{{ selectedBreed.temperament }}</p>
+            </div>
+
+            <div>
+              <h4 class="font-semibold text-gray-700 mb-2">Características</h4>
+              <div class="flex flex-wrap gap-2">
+                <span *ngIf="selectedBreed.hypoallergenic === 1" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                  Hipolargénico
+                </span>
+                <span *ngIf="selectedBreed.hairless === 1" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  Sin pelo
+                </span>
+                <span *ngIf="selectedBreed.natural === 1" class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+                  Natural
+                </span>
+                <span *ngIf="selectedBreed.rare === 1" class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                  Raro
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Carousel -->
+        <div class="relative">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Galería de Imágenes</h3>
+          
+          <div *ngIf="isLoadingImages" class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          </div>
+          
+          <div *ngIf="!isLoadingImages && currentImage" class="space-y-4">
+            <!-- Main Image -->
+            <div class="relative">
+              <img 
+                [src]="currentImage.url" 
+                [alt]="selectedBreed.name"
+                class="w-full h-80 object-cover rounded-lg shadow-md">
+              
+              <!-- Navigation Buttons -->
+              <button 
+                (click)="previousImage()"
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              
+              <button 
+                (click)="nextImage()"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Thumbnail Navigation -->
+            <div *ngIf="breedImages.length > 1" class="flex space-x-2 overflow-x-auto">
+              <button 
+                *ngFor="let image of breedImages; let i = index"
+                (click)="goToImage(i)"
+                [class.border-blue-500]="i === currentImageIndex"
+                class="flex-shrink-0 w-16 h-16 border-2 border-gray-300 rounded-lg overflow-hidden hover:border-blue-400 transition-all">
+                <img 
+                  [src]="image.url" 
+                  [alt]="selectedBreed.name + ' ' + (i + 1)"
+                  class="w-full h-full object-cover">
+              </button>
+            </div>
+            
+            <!-- Image Counter -->
+            <div class="text-center text-sm text-gray-500">
+              {{ currentImageIndex + 1 }} de {{ breedImages.length }}
+            </div>
+          </div>
+          
+          <div *ngIf="!isLoadingImages && breedImages.length === 0" class="text-center py-8">
+            <p class="text-gray-500">No se encontraron imágenes para esta raza</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Selection Message -->
+    <div *ngIf="!selectedBreed && !isLoading" class="text-center py-12">
+      <div class="text-6xl mb-4">🐱</div>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">Selecciona una raza</h3>
+      <p class="text-gray-500">Elige una raza de la lista desplegable para ver información y imágenes</p>
+    </div>
+
+    <!-- Link to Complete Table -->
+    <div class="text-center mt-12">
+      <div class="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">¿Quieres ver todas las razas?</h3>
+        <p class="text-gray-600 mb-6">Explora la tabla completa con todas las razas de gatos y sus características</p>
+        <a 
+          routerLink="/breeds-table"
+          class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+          Ver Tabla Completa
+          <svg class="ml-3 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
     </div>
   </div>
 </div> 

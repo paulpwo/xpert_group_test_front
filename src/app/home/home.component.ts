@@ -1,29 +1,32 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { HomeService } from './services/home.service';
-import { Feature } from './models/feature.interface';
-import { HOME_CONSTANTS } from './constants/home.constants';
+import { CatApiService } from '../services/cat-api.service';
+import { CatBreed, CatImage } from '../models/cat-breed.interface';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  
-  public features: Feature[] = [];
-  public isLoading = true;
-  public readonly constants = HOME_CONSTANTS;
+  public breeds: CatBreed[] = [];
+  public selectedBreed: CatBreed | null = null;
+  public breedImages: CatImage[] = [];
+  public isLoading = false;
+  public isLoadingImages = false;
+  public currentImageIndex = 0;
   
   private destroy$ = new Subject<void>();
   
-  constructor(private homeService: HomeService) {}
+  constructor(private catApiService: CatApiService) {}
   
   ngOnInit(): void {
-    this.loadFeatures();
+    this.loadBreeds();
   }
   
   ngOnDestroy(): void {
@@ -32,36 +35,100 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Carga las características desde el servicio
+   * Carga todas las razas disponibles
    */
-  private loadFeatures(): void {
-    this.homeService.getFeatures()
+  private loadBreeds(): void {
+    this.isLoading = true;
+    this.catApiService.getBreeds()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (features) => {
-          this.features = features;
+        next: (breeds) => {
+          this.breeds = breeds;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading features:', error);
+          console.error('Error loading breeds:', error);
           this.isLoading = false;
         }
       });
   }
   
   /**
-   * Maneja el click del botón principal
+   * Maneja el cambio en el select de razas
    */
-  public onPrimaryButtonClick(): void {
-    // TODO: Implementar navegación o acción
-    console.log('Primary button clicked');
+  public onBreedSelectChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const breedId = target.value;
+    this.onBreedSelect(breedId);
   }
   
   /**
-   * Maneja el click del botón secundario
+   * Maneja la selección de una raza
    */
-  public onSecondaryButtonClick(): void {
-    // TODO: Implementar navegación o acción
-    console.log('Secondary button clicked');
+  public onBreedSelect(breedId: string): void {
+    const selectedBreed = this.breeds.find(breed => breed.id === breedId);
+    if (selectedBreed) {
+      this.selectedBreed = selectedBreed;
+      this.loadBreedImages(breedId);
+    }
+  }
+  
+  /**
+   * Carga las imágenes de la raza seleccionada
+   */
+  private loadBreedImages(breedId: string): void {
+    this.isLoadingImages = true;
+    this.currentImageIndex = 0;
+    
+    this.catApiService.getBreedImages(breedId, 10)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (images) => {
+          this.breedImages = images;
+          this.isLoadingImages = false;
+        },
+        error: (error) => {
+          console.error('Error loading breed images:', error);
+          this.isLoadingImages = false;
+        }
+      });
+  }
+  
+  /**
+   * Navega a la imagen anterior en el carrusel
+   */
+  public previousImage(): void {
+    if (this.breedImages.length > 0) {
+      this.currentImageIndex = this.currentImageIndex > 0 
+        ? this.currentImageIndex - 1 
+        : this.breedImages.length - 1;
+    }
+  }
+  
+  /**
+   * Navega a la imagen siguiente en el carrusel
+   */
+  public nextImage(): void {
+    if (this.breedImages.length > 0) {
+      this.currentImageIndex = this.currentImageIndex < this.breedImages.length - 1 
+        ? this.currentImageIndex + 1 
+        : 0;
+    }
+  }
+  
+  /**
+   * Va a una imagen específica del carrusel
+   */
+  public goToImage(index: number): void {
+    if (index >= 0 && index < this.breedImages.length) {
+      this.currentImageIndex = index;
+    }
+  }
+  
+  /**
+   * Obtiene la imagen actual del carrusel
+   */
+  public get currentImage(): CatImage | null {
+    return this.breedImages.length > 0 ? this.breedImages[this.currentImageIndex] : null;
   }
 } 
